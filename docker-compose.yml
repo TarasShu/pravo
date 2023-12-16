@@ -1,0 +1,20 @@
+version: "3"
+services:
+  ole:
+    image: gcr.io/maps-241812/olebot:latest # Adjust as necessary
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: olebot
+    command: python3 -m bot.bot
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./config.yml:/code/config.yml
+      - data:/code/data
+    ports:
+      - "8080:8080"
+
+volumes:
+  data:

@@ -1,0 +1,12 @@
+httpx==0.23.3
+openai
+beautifulsoup4==4.12.0
+python-telegram-bot==20.2
+PyYAML==6.0.1
+tiktoken==0.3.3
+langchain
+pinecone-client
+python-dotenv
+Flask
+pymongo
+

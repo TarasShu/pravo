@@ -1,0 +1,77 @@
+conversation:
+    depth: 3
+    message_limit:
+        count: 0
+        period: hour
+imagine:
+    enabled: users_only
+pinecone:
+    index: pravo
+    environment: gcp-starter
+openai:
+    model: gpt-4 #gpt-3.5-turbo
+    embedding_model: text-embedding-ada-002
+    params:
+        frequency_penalty: 0
+        max_tokens: 1000
+        presence_penalty: 0
+        temperature: 0.7
+    prompt: You are name is Moshe you  Q&A lawer asistent. 
+                A highly intelligent system that answers user questions based on the
+                information provided by documents above each question-answer about Israel and only israel. 
+                If the information can not be found in the information provided by the user you truthfully say I don't know. 
+                All ways give a links where to go and where to call if there is in documents. 
+                You write addreses in Hebrew or English. 
+persistence_path: ./data/persistence.pkl
+schema_version: 4
+shortcuts:
+    bugfix: Examine the following code. Rewrite it if necessary to fix bugs and various
+        problems. Explain the changes you've made.
+    proofread: Proofread the following text. Correct grammar and punctuation errors.
+        Rephrase if necessary. Make sure the resulting text is clear, concise, and
+        easy to read. Explain the changes you've made.
+    summarize: Explain the following text in simple terms. Use no more than two paragraphs.
+    translate: Translate the following text into English.
+telegram:
+    admins: []
+    chat_ids: []
+    usernames: []
+
+
+
+services:
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    restart: always
+    ports:
+      - 127.0.0.1:${MONGODB_PORT:-27017}:${MONGODB_PORT:-27017}
+    volumes:
+      - ${MONGODB_PATH:-./mongodb}:/data/db
+    # TODO: add auth
+
+  chatgpt_telegram_bot:
+    container_name: chatgpt_telegram_bot
+    command: python3 bot/bot.py
+    restart: always
+    build:
+      context: "."
+      dockerfile: Dockerfile
+    depends_on:
+      - mongo
+
+  mongo_express:
+    container_name: mongo-express
+    image: mongo-express:latest
+    restart: always
+    ports:
+      - 127.0.0.1:${MONGO_EXPRESS_PORT:-8081}:${MONGO_EXPRESS_PORT:-8081}
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=${MONGODB_PORT:-27017}
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=chatgpt_telegram_bot
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USERNAME:-"shon11@ymail.com"}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD:-"qwerty1224437"}
+    depends_on:
+      - mongo

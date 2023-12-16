@@ -1,0 +1,72 @@
+image: google/cloud-sdk:latest
+
+services:
+  - docker:24.0.5-dind
+
+stages:
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+  DOCKER_HOST: tcp://docker:2375
+  #
+  # This instructs Docker not to start over TLS.
+  DOCKER_TLS_CERTDIR: ""
+  # Define other environment variables here or in the GitLab UI
+  GCR_HOSTNAME: "gcr.io"
+  PROJECT_ID: "maps-241812"
+  ARTIFACT_ZONE: "us-west2"
+  ARTIFACT_REPO: "n1"
+  SERVICE_NAME: "ole"
+  VM_ZONE: "me-west1-c"
+  VM_INSTANCE: "instance-1"
+  IMAGE_NAME: "${GCR_HOSTNAME}/${PROJECT_ID}/ole"
+  TAG: ${CI_COMMIT_BRANCH}-latest
+  REMOTE_IMAGE_NAME: "${ARTIFACT_ZONE}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/${SERVICE_NAME}:latest"
+
+before_script:
+
+  # Authenticate to GCR
+  - docker info
+  - export DOCKER_HOST=tcp://docker:2375
+  - export DOCKER_TLS_CERTDIR=""
+
+
+
+  - gcloud auth activate-service-account --key-file=glft-xLGx5icJZRCgcAbJbd_D
+  - gcloud config set project maps-241812
+  - gcloud auth configure-docker us-west2-docker.pkg.dev
+  - mkdir -p /root/.docker   
+
+
+
+build:
+  stage: build
+  script:
+    # Build the Docker images using Docker Compose
+    - apt-get update & apt-get install -y curl
+    - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    - chmod +x /usr/local/bin/docker-compose
+
+    - echo PINECONE_API_KEY=$PINECONE_API_KEY >> .env
+    - echo OPENAI_API_KEY=$OPENAI_API_KEY >> .env
+    - echo TELEGRAM_TOKEN=$TELEGRAM_TOKEN >> .env
+    - echo "DOCKER_HOST=$DOCKER_HOST"
+    - echo "DOCKER_TLS_CERTDIR=$DOCKER_TLS_CERTDIR"
+    - docker-compose build
+    - docker images
+    - docker tag gcr.io/maps-241812/olebot:latest REMOTE_IMAGE_NAME
+    - docker push REMOTE_IMAGE_NAME
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  script:
+    # Deploy the updated services to the GCE VM
+    - echo 'yes' | gcloud compute ssh --zone ${VM_ZONE} ${VM_INSTANCE} --command "docker pull ${IMAGE_NAME}:latest && docker-compose up -d"
+
+  only:
+    - main
