@@ -9,4 +9,6 @@ pinecone-client
 python-dotenv
 Flask
 pymongo
+ConfigParser
+
 
