@@ -19,7 +19,7 @@ class TranslatorOpen:
     def Out_trRtoE(self, content):
         
         engRus = client.chat.completions.create(
-            model="gpt-4", #gpt-3.5-turbo",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "translate from russian to english if it's in english."},
                 {"role": "user", "content": content}

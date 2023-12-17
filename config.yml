@@ -9,7 +9,7 @@ pinecone:
     index: pravo
     environment: gcp-starter
 openai:
-    model: gpt-4 #gpt-3.5-turbo
+    model: gpt-3.5-turbo
     embedding_model: text-embedding-ada-002
     params:
         frequency_penalty: 0

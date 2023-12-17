@@ -32,7 +32,7 @@ class OpenAI:
     params: dict
     embedding_model: str
     azure: Optional[dict] = None
-    default_model ="gpt-4"   #"gpt-3.5-turbo"
+    default_model ="gpt-3.5-turbo"
     default_prompt ="""
         You are a lawyer in Israel.
         Your name is Tommy.
