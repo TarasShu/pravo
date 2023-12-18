@@ -37,7 +37,7 @@ api_openai = os.getenv('OPENAI_API_KEY')
 
 
 client = OpenAI(
-  api_key=api_openai#os.environ['OPENAI_API_KEY'],  # this is also the default, it can be omitted
+  api_key=api_openai,#os.environ['OPENAI_API_KEY'],  # this is also the default, it can be omitted
 )
 
 aclient = AsyncOpenAI(api_key=api_openai)
