@@ -16,7 +16,7 @@ RUN apk update \
         gfortran \
     && (grep -q 64 /etc/apk/arch || apk add cargo rust) \
     && rm -rf /var/cache/apk/*
-COPY ./config.yml /bot/config.yml
+COPY ./config.yml /code/config.yml
 COPY ./requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
